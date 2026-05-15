@@ -1,0 +1,63 @@
+name: Render video
+
+on:
+  workflow_dispatch:
+    inputs:
+      width:
+        description: "Video width (px)"
+        type: string
+        default: "3840"
+      height:
+        description: "Video height (px)"
+        type: string
+        default: "2160"
+      fps:
+        description: "Frames per second"
+        type: string
+        default: "30"
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Fetch royalty-free music
+        run: ./scripts/fetch-music.sh
+
+      - name: Render video
+        run: |
+          node scripts/render-video.mjs \
+            --width  ${{ github.event.inputs.width }} \
+            --height ${{ github.event.inputs.height }} \
+            --fps    ${{ github.event.inputs.fps }}
+
+      - name: Probe output
+        run: ffprobe -v error -show_format -show_streams output/bdc-auterive-4k.mp4 || true
+
+      - name: Upload video artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bdc-auterive-${{ github.event.inputs.width }}x${{ github.event.inputs.height }}-${{ github.event.inputs.fps }}fps
+          path: output/bdc-auterive-4k.mp4
+          if-no-files-found: error
+          retention-days: 30
