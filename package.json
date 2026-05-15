@@ -1,0 +1,18 @@
+{
+  "name": "la-bastide-des-coeurs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cinematic presentation for the La Bastide des Cœurs project (Auterive, juin 2026)",
+  "type": "module",
+  "scripts": {
+    "render": "node scripts/render-video.mjs",
+    "render:1080p": "node scripts/render-video.mjs --width 1920 --height 1080 --fps 30",
+    "render:preview": "node scripts/render-video.mjs --width 1280 --height 720 --fps 15"
+  },
+  "dependencies": {
+    "puppeteer": "^23.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
